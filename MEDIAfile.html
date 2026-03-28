@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Media Studio Pro - Tạo file ảnh/video/MP3 | Chọn tên file</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #eee;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(120deg, #a8edea, #fed6e3, #ffb347);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #b8c7e7;
+            font-size: 0.95rem;
+        }
+
+        /* Upload Card */
+        .upload-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 1.8rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(255,255,255,0.4);
+            border-radius: 28px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .drop-zone:hover {
+            border-color: #ffb347;
+            background: rgba(255,180,71,0.1);
+            transform: scale(0.98);
+        }
+
+        .drop-zone.active {
+            border-color: #4c9aff;
+            background: rgba(76,154,255,0.15);
+        }
+
+        .drop-icon {
+            font-size: 3.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .drop-zone h3 {
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+
+        .file-input-label {
+            background: linear-gradient(135deg, #ffb347, #ff8c00);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            padding: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .format-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .format-label {
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .format-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #eee;
+        }
+
+        .format-btn.active {
+            background: #ff8c00;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255,140,0,0.4);
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Modal cho chọn tên file */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            color: #1e293b;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #0f3460;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #ff8c00;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .modal-btn {
+            padding: 0.6rem 1.5rem;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .modal-btn.cancel {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .modal-btn.confirm {
+            background: #ff8c00;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Media Grid */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .media-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .media-preview {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            max-height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .media-preview img, 
+        .media-preview video {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .media-info {
+            padding: 1rem;
+            color: #1e293b;
+        }
+
+        .media-type {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .type-image {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .type-video {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .file-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.8rem;
+        }
+
+        .file-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.15s;
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .file-btn:hover {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+
+        .download-btn {
+            background: #22c55e;
+            color: white;
+        }
+
+        .audio-btn {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .detail-row {
+            font-size: 0.75rem;
+            margin: 0.3rem 0;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2rem;
+            color: #ccc;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #22c55e;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .progress-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        @media (max-width: 700px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .media-grid {
+                grid-template-columns: 1fr;
+            }
+            .file-btn {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎬 Media Studio Pro</h1>
+        <p>Lấy ảnh/video từ thư viện → Tạo file .jpg, .png, .webp, .mp4, .mov | Trích xuất MP3 | Chọn tên file tùy chỉnh</p>
+    </div>
+
+    <div class="upload-card">
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">📸🎥</div>
+            <h3>Kéo thả ảnh/video vào đây</h3>
+            <p>Hoặc click để chọn từ thư viện máy</p>
+            <label class="file-input-label" for="fileInput">📁 Chọn file ảnh/video</label>
+            <input type="file" id="fileInput" multiple accept="image/*,video/*">
+            <div style="margin-top: 0.8rem; font-size: 0.7rem; opacity: 0.7;">✅ Hỗ trợ: JPG, PNG, GIF, WebP, MP4, MOV, WebM, AVI...</div>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <div class="format-group">
+            <span class="format-label">📦 Định dạng xuất ảnh:</span>
+            <button class="format-btn active" data-image-format="jpg">JPG</button>
+            <button class="format-btn" data-image-format="png">PNG</button>
+            <button class="format-btn" data-image-format="webp">WEBP</button>
+        </div>
+        <div class="format-group">
+            <span class="format-label">🎬 Định dạng video:</span>
+            <button class="format-btn active" data-video-format="mp4">MP4</button>
+            <button class="format-btn" data-video-format="mov">MOV</button>
+        </div>
+        <button class="action-btn" id="extractAllAudioBtn">
+            🎵 Trích xuất MP3 từ tất cả video
+        </button>
+    </div>
+
+    <div id="mediaListContainer">
+        <div class="empty-state">
+            🎯 Chưa có file nào. Hãy tải lên ảnh hoặc video từ máy.<br>
+            💡 Click vào nút "Tải xuống" dưới mỗi media để chọn tên file và tải về
+        </div>
+    </div>
+    <footer>
+        🔧 Tính năng: Tạo file ảnh (JPG/PNG/WEBP) | Tạo file video (MP4/MOV) | Trích xuất âm thanh MP3 từ video<br>
+        📝 **Mới**: Có thể đặt tên file trước khi tải xuống!
+    </footer>
+</div>
+
+<!-- Modal chọn tên file -->
+<div id="fileNameModal" class="modal">
+    <div class="modal-content">
+        <h3>💾 Đặt tên file</h3>
+        <p style="color: #64748b; font-size: 0.9rem;">Nhập tên file bạn muốn lưu (không cần đuôi mở rộng)</p>
+        <input type="text" id="fileNameInput" placeholder="Nhập tên file..." autocomplete="off">
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" id="cancelModalBtn">Hủy</button>
+            <button class="modal-btn confirm" id="confirmModalBtn">Tải xuống</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const mediaContainer = document.getElementById('mediaListContainer');
+        const extractAllAudioBtn = document.getElementById('extractAllAudioBtn');
+        const modal = document.getElementById('fileNameModal');
+        const fileNameInput = document.getElementById('fileNameInput');
+        const cancelModalBtn = document.getElementById('cancelModalBtn');
+        const confirmModalBtn = document.getElementById('confirmModalBtn');
+        
+        let currentFiles = [];
+        let currentImageFormat = 'jpg';
+        let currentVideoFormat = 'mp4';
+        let objectURLs = [];
+        
+        // Biến lưu thông tin file đang xử lý
+        let pendingDownload = {
+            blob: null,
+            defaultName: '',
+            fileType: '',
+            resolve: null,
+            reject: null
+        };
+
+        // Các nút format cho ảnh
+        document.querySelectorAll('[data-image-format]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-image-format]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentImageFormat = btn.getAttribute('data-image-format');
+            });
+        });
+        
+        // Các nút format cho video
+        document.querySelectorAll('[data-video-format]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-video-format]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentVideoFormat = btn.getAttribute('data-video-format');
+            });
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showToast(message, bgColor = '#22c55e') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.background = bgColor;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function revokeAllURLs() {
+            objectURLs.forEach(url => URL.revokeObjectURL(url));
+            objectURLs = [];
+        }
+
+        // Hiển thị modal để chọn tên file
+        function showFileNameDialog(defaultName, fileExtension, blob) {
+            return new Promise((resolve, reject) => {
+                // Loại bỏ đuôi mở rộng cũ
+                let baseName = defaultName.replace(/\.[^/.]+$/, '');
+                fileNameInput.value = baseName;
+                pendingDownload = {
+                    blob: blob,
+                    defaultName: defaultName,
+                    fileExtension: fileExtension,
+                    resolve: resolve,
+                    reject: reject
+                };
+                modal.classList.add('active');
+                fileNameInput.focus();
+                fileNameInput.select();
+            });
+        }
+
+        // Đóng modal
+        function closeModal() {
+            modal.classList.remove('active');
+            if (pendingDownload.reject) {
+                pendingDownload.reject('Hủy tải xuống');
+            }
+            pendingDownload = { blob: null, defaultName: '', fileExtension: '', resolve: null, reject: null };
+        }
+
+        // Xác nhận và tải file
+        function confirmDownload() {
+            if (!pendingDownload.blob) {
+                closeModal();
+                return;
+            }
+            
+            let customName = fileNameInput.value.trim();
+            if (!customName) {
+                customName = pendingDownload.defaultName.replace(/\.[^/.]+$/, '');
+            }
+            
+            const finalFileName = `${customName}.${pendingDownload.fileExtension}`;
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(pendingDownload.blob);
+            link.href = url;
+            link.download = finalFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            if (pendingDownload.resolve) {
+                pendingDownload.resolve(finalFileName);
+            }
+            closeModal();
+            showToast(`✅ Đã tải file: ${finalFileName}`, '#22c55e');
+        }
+
+        cancelModalBtn.addEventListener('click', closeModal);
+        confirmModalBtn.addEventListener('click', confirmDownload);
+        
+        // Enter key trong input
+        fileNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmDownload();
+            }
+        });
+        
+        // Đóng modal khi click ra ngoài
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Tạo file ảnh
+        async function createImageFile(file, format) {
+            return new Promise((resolve, reject) => {
+                if (!file.type.startsWith('image/')) {
+                    reject('Không phải file ảnh');
+                    return;
+                }
+                
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                objectURLs.push(url);
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    let mimeType = `image/${format}`;
+                    let extension = format;
+                    if (format === 'jpg') {
+                        mimeType = 'image/jpeg';
+                        extension = 'jpg';
+                    }
+                    
+                    canvas.toBlob((blob) => {
+                        const fileName = file.name.replace(/\.[^/.]+$/, '');
+                        resolve({ blob, fileName, extension, mimeType });
+                        URL.revokeObjectURL(url);
+                    }, mimeType, 0.92);
+                };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject('Không thể đọc ảnh');
+                };
+                
+                img.src = url;
+            });
+        }
+
+        // Tạo file video
+        async function createVideoFile(file, targetFormat) {
+            return new Promise((resolve, reject) => {
+                if (!file.type.startsWith('video/')) {
+                    reject('Không phải file video');
+                    return;
+                }
+                
+                // Copy file với định dạng mới
+                const newBlob = new Blob([file], { type: `video/${targetFormat}` });
+                const fileName = file.name.replace(/\.[^/.]+$/, '');
+                resolve({ blob: newBlob, fileName, extension: targetFormat, mimeType: `video/${targetFormat}` });
+            });
+        }
+
+        // Trích xuất âm thanh từ video thành MP3
+        async function extractAudioFromVideo(videoFile) {
+            return new Promise((resolve, reject) => {
+                if (!videoFile.type.startsWith('video/')) {
+                    reject('Chỉ hỗ trợ trích xuất âm thanh từ video');
+                    return;
+                }
+                
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const url = URL.createObjectURL(videoFile);
+                objectURLs.push(url);
+                
+                fetch(url)
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        const numberOfChannels = audioBuffer.numberOfChannels;
+                        const sampleRate = audioBuffer.sampleRate;
+                        const length = audioBuffer.length;
+                        const samples = [];
+                        
+                        for (let channel = 0; channel < numberOfChannels; channel++) {
+                            samples.push(audioBuffer.getChannelData(channel));
+                        }
+                        
+                        // Kiểm tra lamejs
+                        if (typeof lamejs === 'undefined') {
+                            reject('Đang tải thư viện MP3, vui lòng thử lại sau 2 giây');
+                            return;
+                        }
+                        
+                        const mp3Encoder = new lamejs.Mp3Encoder(numberOfChannels, sampleRate, 128);
+                        const mp3Data = [];
+                        const sampleBlockSize = 1152;
+                        
+                        for (let i = 0; i < length; i += sampleBlockSize) {
+                            const sampleChunk = Math.min(sampleBlockSize, length - i);
+                            const left = new Int16Array(sampleChunk);
+                            const right = numberOfChannels > 1 ? new Int16Array(sampleChunk) : null;
+                            
+                            for (let j = 0; j < sampleChunk; j++) {
+                                left[j] = Math.max(-32768, Math.min(32767, Math.floor(samples[0][i + j] * 32767)));
+                                if (numberOfChannels > 1 && right) {
+                                    right[j] = Math.max(-32768, Math.min(32767, Math.floor(samples[1][i + j] * 32767)));
+                                }
+                            }
+                            
+                            const mp3buf = numberOfChannels > 1 
+                                ? mp3Encoder.encodeBuffer(left, right)
+                                : mp3Encoder.encodeBuffer(left);
+                            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        }
+                        
+                        const mp3buf = mp3Encoder.flush();
+                        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+                        
+                        const mp3Blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                        const fileName = videoFile.name.replace(/\.[^/.]+$/, '');
+                        
+                        resolve({ blob: mp3Blob, fileName, extension: 'mp3', mimeType: 'audio/mpeg' });
+                        URL.revokeObjectURL(url);
+                        audioContext.close();
+                    })
+                    .catch(err => {
+                        URL.revokeObjectURL(url);
+                        reject('Không thể trích xuất âm thanh: ' + err.message);
+                    });
+            });
+        }
+
+        // Tải file với modal chọn tên
+        async function downloadWithName(blob, defaultName, extension) {
+            try {
+                const finalName = await showFileNameDialog(defaultName, extension, blob);
+                return finalName;
+            } catch (error) {
+                if (error !== 'Hủy tải xuống') {
+                    showToast('Đã hủy tải xuống', '#f59e0b');
+                }
+                return null;
+            }
+        }
+
+        // Xử lý tải ảnh
+        async function handleImageDownload(file, btnElement) {
+            try {
+                btnElement.disabled = true;
+                const originalText = btnElement.textContent;
+                btnElement.innerHTML = '<span class="progress-indicator"></span>Đang xử lý...';
+                
+                const result = await createImageFile(file, currentImageFormat);
+                const finalName = await downloadWithName(result.blob, result.fileName, result.extension);
+                
+                if (finalName) {
+                    showToast(`✅ Đã tải: ${finalName}`, '#22c55e');
+                }
+            } catch (err) {
+                showToast('❌ Lỗi: ' + err, '#ef4444');
+            } finally {
+                btnElement.disabled = false;
+                btnElement.innerHTML = `📸 Tải ${currentImageFormat.toUpperCase()}`;
+            }
+        }
+
+        // Xử lý tải video
+        async function handleVideoDownload(file, btnElement) {
+            try {
+                btnElement.disabled = true;
+                btnElement.innerHTML = '<span class="progress-indicator"></span>Đang xử lý...';
+                
+                const result = await createVideoFile(file, currentVideoFormat);
+                const finalName = await downloadWithName(result.blob, result.fileName, result.extension);
+                
+                if (finalName) {
+                    showToast(`✅ Đã tải: ${finalName}`, '#22c55e');
+                }
+            } catch (err) {
+                showToast('❌ Lỗi: ' + err, '#ef4444');
+            } finally {
+                btnElement.disabled = false;
+                btnElement.innerHTML = `🎬 Tải ${currentVideoFormat.toUpperCase()}`;
+            }
+        }
+
+        // Xử lý trích xuất MP3
+        async function handleAudioExtract(file, btnElement) {
+            try {
+                btnElement.disabled = true;
+                btnElement.innerHTML = '<span class="progress-indicator"></span>Đang trích xuất...';
+                
+                const result = await extractAudioFromVideo(file);
+                const finalName = await downloadWithName(result.blob, result.fileName, result.extension);
+                
+                if (finalName) {
+                    showToast(`✅ Đã trích xuất MP3: ${finalName}`, '#22c55e');
+                }
+            } catch (err) {
+                showToast('❌ Lỗi: ' + err, '#ef4444');
+            } finally {
+                btnElement.disabled = false;
+                btnElement.innerHTML = '🎵 Trích xuất MP3';
+            }
+        }
+
+        // Render danh sách media
+        function renderMediaList(files) {
+            if (!files || files.length === 0) {
+                mediaContainer.innerHTML = `<div class="empty-state">📭 Chưa có file. Hãy chọn ảnh hoặc video từ máy.</div>`;
+                return;
+            }
+            
+            const validFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+            if (validFiles.length === 0) {
+                mediaContainer.innerHTML = `<div class="empty-state">⚠️ Không có file ảnh hoặc video hợp lệ.</div>`;
+                return;
+            }
+            
+            const grid = document.createElement('div');
+            grid.className = 'media-grid';
+            
+            validFiles.forEach((file, idx) => {
+                const isImage = file.type.startsWith('image/');
+                const isVideo = file.type.startsWith('video/');
+                const previewURL = URL.createObjectURL(file);
+                objectURLs.push(previewURL);
+                
+                const card = document.createElement('div');
+                card.className = 'media-card';
+                
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'media-preview';
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = previewURL;
+                    img.alt = file.name;
+                    previewDiv.appendChild(img);
+                } else if (isVideo) {
+                    const video = document.createElement('video');
+                    video.src = previewURL;
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    video.style.maxHeight = '180px';
+                    previewDiv.appendChild(video);
+                }
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'media-info';
+                
+                const typeBadge = document.createElement('span');
+                typeBadge.className = `media-type ${isImage ? 'type-image' : 'type-video'}`;
+                typeBadge.textContent = isImage ? '🖼️ ẢNH' : '🎬 VIDEO';
+                infoDiv.appendChild(typeBadge);
+                
+                const nameRow = document.createElement('div');
+                nameRow.className = 'detail-row';
+                nameRow.innerHTML = `<strong>📄 Tên gốc:</strong> <span style="word-break:break-all;">${escapeHtml(file.name)}</span>`;
+                infoDiv.appendChild(nameRow);
+                
+                const sizeRow = document.createElement('div');
+                sizeRow.className = 'detail-row';
+                sizeRow.innerHTML = `<strong>💾 Dung lượng:</strong> ${formatFileSize(file.size)}`;
+                infoDiv.appendChild(sizeRow);
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'file-actions';
+                
+                if (isImage) {
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'file-btn download-btn';
+                    downloadBtn.innerHTML = `📸 Tải ${currentImageFormat.toUpperCase()}`;
+                    downloadBtn.onclick = () => handleImageDownload(file, downloadBtn);
+                    actionsDiv.appendChild(downloadBtn);
+                }
+                
+                if (isVideo) {
+                    const downloadVideoBtn = document.createElement('button');
+                    downloadVideoBtn.className = 'file-btn download-btn';
+                    downloadVideoBtn.innerHTML = `🎬 Tải ${currentVideoFormat.toUpperCase()}`;
+                    downloadVideoBtn.onclick = () => handleVideoDownload(file, downloadVideoBtn);
+                    actionsDiv.appendChild(downloadVideoBtn);
+                    
+                    const extractMp3Btn = document.createElement('button');
+                    extractMp3Btn.className = 'file-btn audio-btn';
+                    extractMp3Btn.innerHTML = '🎵 Trích xuất MP3';
+                    extractMp3Btn.onclick = () => handleAudioExtract(file, extractMp3Btn);
+                    actionsDiv.appendChild(extractMp3Btn);
+                }
+                
+                infoDiv.appendChild(actionsDiv);
+                card.appendChild(previewDiv);
+                card.appendChild(infoDiv);
+                grid.appendChild(card);
+            });
+            
+            mediaContainer.innerHTML = '';
+            mediaContainer.appendChild(grid);
+        }
+        
+        // Trích xuất MP3 từ tất cả video
+        async function extractAllAudio() {
+            const videos = currentFiles.filter(f => f.type.startsWith('video/'));
+            if (videos.length === 0) {
+                showToast('⚠️ Không có video nào để trích xuất âm thanh!', '#f59e0b');
+                return;
+            }
+            
+            extractAllAudioBtn.disabled = true;
+            extractAllAudioBtn.innerHTML = '<span class="progress-indicator"></span>Đang trích xuất...';
+            
+            let successCount = 0;
+            for (let i = 0; i < videos.length; i++) {
+                try {
+                    const result = await extractAudioFromVideo(videos[i]);
+                    const finalName = await downloadWithName(result.blob, result.fileName, result.extension);
+                    if (finalName) {
+                        successCount++;
+                    }
+                    await new Promise(r => setTimeout(r, 300));
+                } catch (err) {
+                    showToast(`❌ Lỗi video ${i+1}: ${err}`, '#ef4444');
+                }
+            }
+            
+            extractAllAudioBtn.disabled = false;
+            extractAllAudioBtn.innerHTML = '🎵 Trích xuất MP3 từ tất cả video';
+            showToast(`✨ Hoàn thành! Đã trích xuất ${successCount}/${videos.length} video`, '#22c55e');
+        }
+        
+        extractAllAudioBtn.addEventListener('click', extractAllAudio);
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        function handleFiles(fileList) {
+            if (!fileList || fileList.length === 0) return;
+            const filesArray = Array.from(fileList);
+            currentFiles = filesArray;
+            revokeAllURLs();
+            objectURLs = [];
+            renderMediaList(currentFiles);
+        }
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            fileInput.value = '';
+        });
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+            dropZone.addEventListener(ev, preventDefaults);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        dropZone.addEventListener('dragenter', () => dropZone.classList.add('active'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('active'));
+        dropZone.addEventListener('drop', (e) => {
+            dropZone.classList.remove('active');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        dropZone.addEventListener('click', (e) => {
+            if (e.target === dropZone || !e.target.closest('.file-input-label')) {
+                fileInput.click();
+            }
+        });
+        
+        window.addEventListener('beforeunload', () => revokeAllURLs());
+        
+        // Load lamejs cho MP3 encoding
+        if (typeof lamejs === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js';
+            document.head.appendChild(script);
+        }
+        
+        renderMediaList([]);
+    })();
+</script>
+</body>
+</html>
